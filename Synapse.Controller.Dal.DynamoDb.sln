@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27428.2043
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synapse.Controller.Dal.DynamoDb", "Synapse.Controller.Dal.DynamoDb\Synapse.Controller.Dal.DynamoDb.csproj", "{58462EC7-DADE-4D19-A2D4-90E391AA4BBB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synapse.Controller.Dal.DynamoDb.Tests", "Synapse.Controller.Dal.DynamoDb.Tests\Synapse.Controller.Dal.DynamoDb.Tests.csproj", "{D866B0AD-92B7-4AB4-A98B-EF888DB5A645}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{58462EC7-DADE-4D19-A2D4-90E391AA4BBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{58462EC7-DADE-4D19-A2D4-90E391AA4BBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{58462EC7-DADE-4D19-A2D4-90E391AA4BBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D866B0AD-92B7-4AB4-A98B-EF888DB5A645}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D866B0AD-92B7-4AB4-A98B-EF888DB5A645}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D866B0AD-92B7-4AB4-A98B-EF888DB5A645}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D866B0AD-92B7-4AB4-A98B-EF888DB5A645}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{58462EC7-DADE-4D19-A2D4-90E391AA4BBB}</ProjectGuid>
+    <ProjectGuid>{D866B0AD-92B7-4AB4-A98B-EF888DB5A645}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Synapse.Controller.Dal.DynamoDb</RootNamespace>
-    <AssemblyName>Synapse.Controller.Dal.DynamoDb</AssemblyName>
+    <RootNamespace>Synapse.Controller.Dal.DynamoDb.Tests</RootNamespace>
+    <AssemblyName>Synapse.Controller.Dal.DynamoDb.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -63,11 +63,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DynamoDbDal.cs" />
+    <Compile Include="DynamoDbTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
