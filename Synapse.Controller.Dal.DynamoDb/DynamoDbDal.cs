@@ -17,7 +17,7 @@ namespace Synapse.Controller.Dal.DynamoDb
     {
         public string PlanTable { get; set; }
 
-        public string PlanContainerTable { get; set; }
+        public string ContainerTable { get; set; }
 
         private readonly AmazonDynamoDBConfig _clientConfig;
         private readonly AmazonDynamoDBClient _client;
@@ -149,12 +149,12 @@ namespace Synapse.Controller.Dal.DynamoDb
         {
             List<PlanContainer> containerList = new List<PlanContainer>();
 
-            if ( string.IsNullOrWhiteSpace( PlanContainerTable ) )
+            if ( string.IsNullOrWhiteSpace( ContainerTable ) )
                 throw new Exception( "Plan table name must be specified." );
 
             try
             {
-                Table table = Table.LoadTable( _client, PlanContainerTable );
+                Table table = Table.LoadTable( _client, ContainerTable );
                 if ( table != null )
                 {
                     ScanFilter scanFilter = new ScanFilter();
@@ -196,7 +196,7 @@ namespace Synapse.Controller.Dal.DynamoDb
                 }
                 else
                 {
-                    throw new Exception( $"Dynamo table {PlanContainerTable} cannot be found." );
+                    throw new Exception( $"Dynamo table {ContainerTable} cannot be found." );
                 }
             }
             catch ( Exception ex )
@@ -243,12 +243,12 @@ namespace Synapse.Controller.Dal.DynamoDb
             if ( planUId == null || planUId == Guid.Empty )
                 throw new Exception( "Plan container unique id cannot be empty." );
 
-            if ( string.IsNullOrWhiteSpace( PlanContainerTable ) )
+            if ( string.IsNullOrWhiteSpace( ContainerTable ) )
                 throw new Exception( "Plan container table name must be specified." );
 
             try
             {
-                Table table = Table.LoadTable( _client, PlanContainerTable );
+                Table table = Table.LoadTable( _client, ContainerTable );
                 if ( table != null )
                 {
                     table.DeleteItem( planUId );
@@ -261,7 +261,7 @@ namespace Synapse.Controller.Dal.DynamoDb
                 }
                 else
                 {
-                    throw new Exception( $"Table {PlanContainerTable} cannot be found." );
+                    throw new Exception( $"Table {ContainerTable} cannot be found." );
                 }
             }
             catch ( Exception ex )
