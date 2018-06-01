@@ -121,12 +121,12 @@ namespace Synapse.Controller.Dal.DynamoDb
             if ( planContainerUId == Guid.Empty )
                 throw new Exception( "Plan container unique id cannot be empty." );
 
-            if ( string.IsNullOrWhiteSpace( PlanTable ) )
+            if ( string.IsNullOrWhiteSpace( ContainerTable ) )
                 throw new Exception( "Plan container table name must be specified." );
 
             try
             {
-                Table table = Table.LoadTable( _client, PlanTable );
+                Table table = Table.LoadTable( _client, ContainerTable );
                 Document document = table.GetItem( planContainerUId );
                 if ( document == null )
                     throw new Exception( "Plan container cannot be found." );
@@ -150,54 +150,48 @@ namespace Synapse.Controller.Dal.DynamoDb
             List<PlanContainer> containerList = new List<PlanContainer>();
 
             if ( string.IsNullOrWhiteSpace( ContainerTable ) )
-                throw new Exception( "Plan table name must be specified." );
+                throw new Exception( "Plan container table name must be specified." );
 
             try
             {
                 Table table = Table.LoadTable( _client, ContainerTable );
-                if ( table != null )
+                ScanFilter scanFilter = new ScanFilter();
+
+                if ( planContainerUId != null && planContainerUId != Guid.Empty )
+                    scanFilter.AddCondition( "UId", ScanOperator.Equal, planContainerUId );
+                if ( !string.IsNullOrWhiteSpace( name ) )
+                    scanFilter.AddCondition( "Name", ScanOperator.Equal, name );
+
+                if ( !string.IsNullOrWhiteSpace( nodeUri ) )
+                    scanFilter.AddCondition( "NodeUri", ScanOperator.Equal, nodeUri );
+                if ( !string.IsNullOrWhiteSpace( createdBy ) )
+                    scanFilter.AddCondition( "AuditCreatedBy", ScanOperator.Equal, createdBy );
+                if ( createdTime != null )
+                    scanFilter.AddCondition( "AuditCreatedTime", ScanOperator.Equal, createdTime );
+                if ( !string.IsNullOrWhiteSpace( modifiedBy ) )
+                    scanFilter.AddCondition( "AuditModifiedBy", ScanOperator.Equal, modifiedBy );
+                if ( modifiedTime != null )
+                    scanFilter.AddCondition( "AuditModifiedTime", ScanOperator.Equal, modifiedTime );
+
+                if ( scanFilter.ToConditions().Count == 0 )
+                    throw new Exception( "At least one filter condition must be specified." );
+
+                Search search = table.Scan( scanFilter );
+
+                do
                 {
-                    ScanFilter scanFilter = new ScanFilter();
+                    List<Document> documentList = search.GetNextSet();
+                    if ( documentList.Count == 0 )
+                        throw new Exception( "Plan container cannot be found." );
 
-                    if ( planContainerUId != null && planContainerUId != Guid.Empty )
-                        scanFilter.AddCondition( "UId", ScanOperator.Equal, planContainerUId );
-                    if ( !string.IsNullOrWhiteSpace( name ) )
-                        scanFilter.AddCondition( "Name", ScanOperator.Equal, name );
-
-                    if ( !string.IsNullOrWhiteSpace( nodeUri ) )
-                        scanFilter.AddCondition( "NodeUri", ScanOperator.Equal, nodeUri );
-                    if ( !string.IsNullOrWhiteSpace( createdBy ) )
-                        scanFilter.AddCondition( "AuditCreatedBy", ScanOperator.Equal, createdBy );
-                    if ( createdTime != null )
-                        scanFilter.AddCondition( "AuditCreatedTime", ScanOperator.Equal, createdTime );
-                    if ( !string.IsNullOrWhiteSpace( modifiedBy ) )
-                        scanFilter.AddCondition( "AuditModifiedBy", ScanOperator.Equal, modifiedBy );
-                    if ( modifiedTime != null )
-                        scanFilter.AddCondition( "AuditModifiedTime", ScanOperator.Equal, modifiedTime );
-
-                    if ( scanFilter.ToConditions().Count == 0 )
-                        throw new Exception( "At least one filter condition must be specified." );
-
-                    Search search = table.Scan( scanFilter );
-
-                    do
+                    foreach ( Document document in documentList )
                     {
-                        List<Document> documentList = search.GetNextSet();
-                        if ( documentList.Count == 0 )
-                            throw new Exception( "Plan cannot be found." );
+                        string json = document.ToJsonPretty();
+                        PlanContainer container = JsonConvert.DeserializeObject<PlanContainer>( json, _settings );
+                        containerList.Add( container );
+                    }
+                } while ( !search.IsDone );
 
-                        foreach ( Document document in documentList )
-                        {
-                            string json = document.ToJsonPretty();
-                            PlanContainer container = JsonConvert.DeserializeObject<PlanContainer>( json, _settings );
-                            containerList.Add( container );
-                        }
-                    } while ( !search.IsDone );
-                }
-                else
-                {
-                    throw new Exception( $"Dynamo table {ContainerTable} cannot be found." );
-                }
             }
             catch ( Exception ex )
             {
@@ -219,7 +213,7 @@ namespace Synapse.Controller.Dal.DynamoDb
             if ( string.IsNullOrWhiteSpace( planContainer.Name ) )
                 throw new Exception( "Plan container name cannot be null or empty." );
 
-            if ( string.IsNullOrWhiteSpace( PlanTable ) )
+            if ( string.IsNullOrWhiteSpace( ContainerTable ) )
                 throw new Exception( "Plan container table name must be specified." );
 
             try
@@ -227,7 +221,7 @@ namespace Synapse.Controller.Dal.DynamoDb
                 string output = JsonConvert.SerializeObject( planContainer, Formatting.Indented, _settings );
                 Document doc = Document.FromJson( output );
 
-                Table table = Table.LoadTable( _client, PlanTable );
+                Table table = Table.LoadTable( _client, ContainerTable );
                 table.PutItem( doc );
             }
             catch ( Exception ex )
@@ -311,54 +305,48 @@ namespace Synapse.Controller.Dal.DynamoDb
             try
             {
                 Table table = Table.LoadTable( _client, PlanTable );
-                if ( table != null )
+
+                ScanFilter scanFilter = new ScanFilter();
+
+                if ( planUId != null && planUId != Guid.Empty )
+                    scanFilter.AddCondition( "UId", ScanOperator.Equal, planUId );
+                if ( !string.IsNullOrWhiteSpace( name ) )
+                    scanFilter.AddCondition( "Name", ScanOperator.Equal, name );
+                if ( !string.IsNullOrWhiteSpace( uniqueName ) )
+                    scanFilter.AddCondition( "UniqueName", ScanOperator.Equal, uniqueName );
+                if ( !string.IsNullOrWhiteSpace( planFile ) )
+                    scanFilter.AddCondition( "PlanFile", ScanOperator.Equal, planFile );
+                if ( planFileIsUri != null )
+                    scanFilter.AddCondition( "PlanFileIsUri", ScanOperator.Equal, planFileIsUri );
+                if ( planContainerUId != null && planContainerUId != Guid.Empty )
+                    scanFilter.AddCondition( "PlanContainerUId", ScanOperator.Equal, planContainerUId );
+                if ( !string.IsNullOrWhiteSpace( createdBy ) )
+                    scanFilter.AddCondition( "AuditCreatedBy", ScanOperator.Equal, createdBy );
+                if ( createdTime != null )
+                    scanFilter.AddCondition( "AuditCreatedTime", ScanOperator.Equal, createdTime );
+                if ( !string.IsNullOrWhiteSpace( modifiedBy ) )
+                    scanFilter.AddCondition( "AuditModifiedBy", ScanOperator.Equal, modifiedBy );
+                if ( modifiedTime != null )
+                    scanFilter.AddCondition( "AuditModifiedTime", ScanOperator.Equal, modifiedTime );
+
+                if ( scanFilter.ToConditions().Count == 0 )
+                    throw new Exception( "At least one filter condition must be specified." );
+
+                Search search = table.Scan( scanFilter );
+
+                do
                 {
-                    ScanFilter scanFilter = new ScanFilter();
+                    List<Document> documentList = search.GetNextSet();
+                    if ( documentList.Count == 0 )
+                        throw new Exception( "Plan cannot be found." );
 
-                    if ( planUId != null && planUId != Guid.Empty )
-                        scanFilter.AddCondition( "UId", ScanOperator.Equal, planUId );
-                    if ( !string.IsNullOrWhiteSpace( name ) )
-                        scanFilter.AddCondition( "Name", ScanOperator.Equal, name );
-                    if ( !string.IsNullOrWhiteSpace( uniqueName ) )
-                        scanFilter.AddCondition( "UniqueName", ScanOperator.Equal, uniqueName );
-                    if ( !string.IsNullOrWhiteSpace( planFile ) )
-                        scanFilter.AddCondition( "PlanFile", ScanOperator.Equal, planFile );
-                    if ( planFileIsUri != null )
-                        scanFilter.AddCondition( "PlanFileIsUri", ScanOperator.Equal, planFileIsUri );
-                    if ( planContainerUId != null && planContainerUId != Guid.Empty )
-                        scanFilter.AddCondition( "PlanContainerUId", ScanOperator.Equal, planContainerUId );
-                    if ( !string.IsNullOrWhiteSpace( createdBy ) )
-                        scanFilter.AddCondition( "AuditCreatedBy", ScanOperator.Equal, createdBy );
-                    if ( createdTime != null )
-                        scanFilter.AddCondition( "AuditCreatedTime", ScanOperator.Equal, createdTime );
-                    if ( !string.IsNullOrWhiteSpace( modifiedBy ) )
-                        scanFilter.AddCondition( "AuditModifiedBy", ScanOperator.Equal, modifiedBy );
-                    if ( modifiedTime != null )
-                        scanFilter.AddCondition( "AuditModifiedTime", ScanOperator.Equal, modifiedTime );
-
-                    if ( scanFilter.ToConditions().Count == 0 )
-                        throw new Exception( "At least one filter condition must be specified." );
-
-                    Search search = table.Scan( scanFilter );
-
-                    do
+                    foreach ( Document document in documentList )
                     {
-                        List<Document> documentList = search.GetNextSet();
-                        if ( documentList.Count == 0 )
-                            throw new Exception( "Plan cannot be found." );
-
-                        foreach ( Document document in documentList )
-                        {
-                            string json = document.ToJsonPretty();
-                            PlanItem plan = JsonConvert.DeserializeObject<PlanItem>( json, _settings );
-                            planList.Add( plan );
-                        }
-                    } while ( !search.IsDone );
-                }
-                else
-                {
-                    throw new Exception( $"Dynamo table {PlanTable} cannot be found." );
-                }
+                        string json = document.ToJsonPretty();
+                        PlanItem plan = JsonConvert.DeserializeObject<PlanItem>( json, _settings );
+                        planList.Add( plan );
+                    }
+                } while ( !search.IsDone );
             }
             catch ( Exception ex )
             {
