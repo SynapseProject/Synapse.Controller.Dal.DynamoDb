@@ -34,7 +34,7 @@ namespace Synapse.Controller.Dal.DynamoDb.Tests
         }
 
         [Test]
-        public void DeleteGroup_Null_Plan_Table_Throws_Exception()
+        public void DeletePlan_Null_Plan_Table_Throws_Exception()
         {
             // Arrange
             Guid planUId = Guid.NewGuid();
@@ -68,7 +68,7 @@ namespace Synapse.Controller.Dal.DynamoDb.Tests
         }
 
         [Test]
-        public void DeleteGroup_Non_Existent_Group_Succeeds()
+        public void DeletePlan_Non_Existent_Plan_Succeeds()
         {
             // Arrange
             Guid planUId = Guid.NewGuid();
@@ -103,6 +103,96 @@ namespace Synapse.Controller.Dal.DynamoDb.Tests
 
             Assert.DoesNotThrow( () => dal.DeletePlan( planUId ) );
         }
+
+
+        [Test]
+        public void DeletePlanContainer_Empty_UId_Throws_Exception()
+        {
+            // Arrange
+            Guid containerUId = Guid.Empty;
+            DynamoDbDal dal = new DynamoDbDal
+            {
+                ContainerTable = _containerTable
+            };
+
+            // Act
+            Exception ex = Assert.Throws<Exception>( () => dal.DeletePlanContainer( containerUId ) );
+
+            // Assert
+            StringAssert.AreEqualIgnoringCase( "Plan container unique id cannot be empty.", ex.Message );
+        }
+
+        [Test]
+        public void DeletePlanContainer_Null_Container_Table_Throws_Exception()
+        {
+            // Arrange
+            Guid containerUId = Guid.NewGuid();
+            DynamoDbDal dal = new DynamoDbDal
+            {
+                ContainerTable = ""
+            };
+
+            // Act
+            Exception ex = Assert.Throws<Exception>( () => dal.DeletePlanContainer( containerUId ) );
+
+            // Assert
+            StringAssert.AreEqualIgnoringCase( ex.Message, "Plan container table name must be specified." );
+        }
+
+        [Test]
+        public void DeletePlanContainer_Non_Existent_Table_Throws_Exception()
+        {
+            // Arrange
+            Guid containerUId = Guid.NewGuid();
+            DynamoDbDal dal = new DynamoDbDal
+            {
+                ContainerTable = "XXXXXX"
+            };
+
+            // Act
+            Exception ex = Assert.Throws<ResourceNotFoundException>( () => dal.DeletePlanContainer( containerUId ) );
+
+            // Assert
+            StringAssert.Contains( "Requested resource not found: Table", ex.Message );
+        }
+
+        [Test]
+        public void DeletePlanContainer_Non_Existent_Container_Succeeds()
+        {
+            // Arrange
+            Guid containerUId = Guid.NewGuid();
+            DynamoDbDal dal = new DynamoDbDal
+            {
+                ContainerTable = _containerTable
+            };
+
+            // Act
+            // Assert
+            Assert.DoesNotThrow( () => dal.DeletePlanContainer( containerUId ) );
+        }
+
+        [Test]
+        public void DeletePlanContainer_Existing_Container_Succeeds()
+        {
+            // Arrange
+            Guid containerUId = Guid.NewGuid();
+            ;
+            PlanContainer container = new PlanContainer()
+            {
+                UId = containerUId,
+                Name = _containerPrefix + containerUId
+            };
+            DynamoDbDal dal = new DynamoDbDal
+            {
+                ContainerTable = _containerTable
+            };
+
+            // Act
+            dal.UpsertPlanContainer( container );
+
+            Assert.DoesNotThrow( () => dal.DeletePlanContainer( containerUId ) );
+        }
+
 
         [Test]
         public void GetPlanByAny_No_Filter_Condition_Throws_Exception()
